@@ -1,6 +1,6 @@
 # expenses_app_v2
 
-A new Flutter project.
+A tutorial Flutter project for personal expenses app.
 
 ## Getting Started
 
