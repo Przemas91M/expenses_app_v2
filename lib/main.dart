@@ -13,14 +13,15 @@ class MyApp extends StatelessWidget {
       title: 'Flutter App',
       home: MyHomePage(),
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-            .copyWith(secondary: Colors.tealAccent.shade700),
         primaryColor: Colors.teal,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(
               color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         fontFamily: 'Quicksand',
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
+            .copyWith(secondary: Colors.tealAccent.shade700)
+            .copyWith(error: Colors.red.shade800),
       ),
     );
   }
@@ -50,13 +51,14 @@ class _MyHomePageState extends State<MyHomePage> {
     ).toList();
   }
 
-  void _addNewTransaction(String tsTitle, double tsAmount) {
+  void _addNewTransaction(
+      String tsTitle, double tsAmount, DateTime tsChosenDate) {
     final tsData = Transaction(
         //nowy obiekt
         id: DateTime.now().toString(),
         title: tsTitle,
         amount: tsAmount,
-        date: DateTime.now());
+        date: tsChosenDate);
 
     setState(() {
       _userTransactions.add(tsData);
@@ -69,6 +71,12 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (_) {
           return NewTransaction(_addNewTransaction);
         });
+  }
+
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions.removeWhere((element) => element.id == id);
+    });
   }
 
   @override
@@ -91,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Chart(_recentTransactions),
-            TransactionList(_userTransactions)
+            TransactionList(_userTransactions, _deleteTransaction)
           ],
         ),
       ),

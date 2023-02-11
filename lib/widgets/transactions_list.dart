@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
-
-  const TransactionList(this.transactions,
+  final Function deleteTransaction;
+  const TransactionList(this.transactions, this.deleteTransaction,
       {super.key}); //konstruktor klasy, wymaga listy transakcji do wyswietlenia w appce
 
   @override
@@ -55,6 +55,20 @@ class TransactionList extends StatelessWidget {
                     ),
                     subtitle: Text(DateFormat('EEEE, dd.MM.yyyy')
                         .format(transactions[index].date)),
+                    trailing: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: Theme.of(context).colorScheme.secondary,
+                              width: 5)),
+                      child: IconButton(
+                        icon: const Icon(Icons.delete_forever),
+                        color: Theme.of(context).colorScheme.error,
+                        onPressed: () =>
+                            deleteTransaction(transactions[index].id),
+                      ),
+                    ),
                   ),
                 );
               },
