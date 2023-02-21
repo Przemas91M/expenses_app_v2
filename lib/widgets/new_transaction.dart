@@ -43,49 +43,55 @@ class _NewTransactionState extends State<NewTransaction> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          TextField(
-            decoration: const InputDecoration(labelText: 'Title'),
-            controller: titleController,
-            autofocus: true,
-            textInputAction: TextInputAction.next,
-          ),
-          TextField(
-            decoration: const InputDecoration(labelText: 'Amount'),
-            controller: amountController,
-            keyboardType: const TextInputType.numberWithOptions(
-              decimal: true,
+    return SingleChildScrollView(
+      child: Card(
+        child: Container(
+          padding: EdgeInsets.only(
+              left: 10,
+              top: 10,
+              right: 10,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 10),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            TextField(
+              decoration: const InputDecoration(labelText: 'Title'),
+              controller: titleController,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
             ),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) =>
-                _submitData, //nie wrzucam argumentu, ale wykonuje funkcje
-          ),
-          SizedBox(
-            height: 70,
-            child: Row(
-              children: [
-                Text(_selectedDate == null
-                    ? 'No date chosen'
-                    : 'Chosen date: ${DateFormat('dd.MM.yyyy').format(_selectedDate!)}'),
-                TextButton(
-                    onPressed: _showDatePicker,
-                    child: const Text(
-                      'Pick a date',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ))
-              ],
+            TextField(
+              decoration: const InputDecoration(labelText: 'Amount'),
+              controller: amountController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) =>
+                  _submitData, //nie wrzucam argumentu, ale wykonuje funkcje
             ),
-          ),
-          ElevatedButton(
-            onPressed: _submitData,
-            child: const Text(
-              'Add Transaction',
+            SizedBox(
+              height: 70,
+              child: Row(
+                children: [
+                  Text(_selectedDate == null
+                      ? 'No date chosen'
+                      : 'Chosen date: ${DateFormat('dd.MM.yyyy').format(_selectedDate!)}'),
+                  TextButton(
+                      onPressed: _showDatePicker,
+                      child: const Text(
+                        'Pick a date',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ))
+                ],
+              ),
             ),
-          ),
-        ]),
+            ElevatedButton(
+              onPressed: _submitData,
+              child: const Text(
+                'Add Transaction',
+              ),
+            ),
+          ]),
+        ),
       ),
     );
   }

@@ -1,20 +1,30 @@
+// import 'package:flutter/services.dart';
+
+import 'package:flutter/services.dart';
+
 import './widgets/new_transaction.dart';
 import './widgets/transactions_list.dart';
 import 'package:flutter/material.dart';
 import 'models/transaction.dart';
 import './widgets/chart.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations(
+  //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    //final double curScaleValue = MediaQuery.of(context).textScaleFactor;
     return MaterialApp(
       title: 'Flutter App',
       home: MyHomePage(),
       theme: ThemeData(
         primaryColor: Colors.teal,
-        textTheme: const TextTheme(
+        textTheme: TextTheme(
           bodyLarge: TextStyle(
               color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
         ),
@@ -35,6 +45,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _showChart = false;
   final List<Transaction> _userTransactions = [
     // Transaction(
     //     id: 't1', title: 'New Shoes', amount: 299.99, date: DateTime.now()),
@@ -81,25 +92,66 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final double curScaleValue = MediaQuery.of(context).textScaleFactor;
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final appBar = AppBar(
+      title: const Text('Personal Expenses App'),
+      titleTextStyle: TextStyle(
+          fontFamily: 'OpenSans',
+          fontWeight: FontWeight.bold,
+          fontSize: 18 * curScaleValue),
+      actions: [
+        IconButton(
+          onPressed: () => _startNewTransaction(context),
+          icon: const Icon(Icons.add),
+        ),
+      ],
+    );
+    //mozemy wywolac widget za pomoca funkcji i zmieniac jego parametry
+    SizedBox chartBox(double size) {
+      return SizedBox(
+          height: (MediaQuery.of(context).size.height -
+                  appBar.preferredSize.height -
+                  MediaQuery.of(context).padding.top) *
+              size,
+          child: Chart(_recentTransactions));
+    }
+
+    final txList = SizedBox(
+        height: (MediaQuery.of(context).size.height -
+                appBar.preferredSize.height -
+                MediaQuery.of(context).padding.top) *
+            0.78,
+        child: TransactionList(_userTransactions, _deleteTransaction));
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Personal Expenses App'),
-        titleTextStyle: const TextStyle(
-            fontFamily: 'OpenSans', fontWeight: FontWeight.bold, fontSize: 18),
-        actions: [
-          IconButton(
-            onPressed: () => _startNewTransaction(context),
-            icon: const Icon(Icons.add),
-          ),
-        ],
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Chart(_recentTransactions),
-            TransactionList(_userTransactions, _deleteTransaction)
+            if (isLandscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Show chart',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Switch(
+                      value: _showChart,
+                      onChanged: (value) {
+                        setState(() {
+                          _showChart = value;
+                        });
+                      }),
+                ],
+              ),
+            if (!isLandscape) chartBox(0.25),
+            if (!isLandscape) txList,
+            if (isLandscape) _showChart ? chartBox(0.6) : txList
           ],
         ),
       ),
