@@ -1,3 +1,4 @@
+import 'adaptive_flat_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -75,12 +76,7 @@ class _NewTransactionState extends State<NewTransaction> {
                   Text(_selectedDate == null
                       ? 'No date chosen'
                       : 'Chosen date: ${DateFormat('dd.MM.yyyy').format(_selectedDate!)}'),
-                  TextButton(
-                      onPressed: _showDatePicker,
-                      child: const Text(
-                        'Pick a date',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ))
+                  AdaptiveFlatButton('Chose a date', _showDatePicker)
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
-// import 'package:flutter/services.dart';
+import 'dart:io';
 
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 
 import './widgets/new_transaction.dart';
 import './widgets/transactions_list.dart';
@@ -21,10 +22,10 @@ class MyApp extends StatelessWidget {
     //final double curScaleValue = MediaQuery.of(context).textScaleFactor;
     return MaterialApp(
       title: 'Flutter App',
-      home: MyHomePage(),
+      home: const MyHomePage(),
       theme: ThemeData(
         primaryColor: Colors.teal,
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           bodyLarge: TextStyle(
               color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
         ),
@@ -90,12 +91,48 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final double curScaleValue = MediaQuery.of(context).textScaleFactor;
-    final bool isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-    final appBar = AppBar(
+  List<Widget> _buildLandscapeContent(Function chartBox, txList) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Show chart',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          Switch.adaptive(
+              value: _showChart,
+              activeColor: Theme.of(context).colorScheme.secondary,
+              onChanged: (value) {
+                setState(() {
+                  _showChart = value;
+                });
+              }),
+        ],
+      ),
+      _showChart ? chartBox(0.6) : txList
+    ];
+  }
+
+  CupertinoNavigationBar _buildCupertinoNavBar() {
+    return CupertinoNavigationBar(
+      middle: const Text('Personal Expenses App'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CupertinoButton(
+            onPressed: () => _startNewTransaction(context),
+            alignment: Alignment.topCenter,
+            child: const Icon(CupertinoIcons.add_circled),
+          ),
+        ],
+      ),
+    );
+  }
+
+  AppBar _buildMaterialAppBar(double curScaleValue) {
+    return AppBar(
       title: const Text('Personal Expenses App'),
       titleTextStyle: TextStyle(
           fontFamily: 'OpenSans',
@@ -108,57 +145,59 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildPortraitContent(Function chartBox, txList) {
+    return [chartBox(0.25), txList];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double curScaleValue = MediaQuery.of(context).textScaleFactor;
+    final mediaQuery = MediaQuery.of(context);
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final dynamic appBar = Platform.isIOS
+        ? _buildCupertinoNavBar()
+        : _buildMaterialAppBar(curScaleValue);
+
     //mozemy wywolac widget za pomoca funkcji i zmieniac jego parametry
     SizedBox chartBox(double size) {
       return SizedBox(
-          height: (MediaQuery.of(context).size.height -
+          height: (mediaQuery.size.height -
                   appBar.preferredSize.height -
-                  MediaQuery.of(context).padding.top) *
+                  mediaQuery.padding.top) *
               size,
           child: Chart(_recentTransactions));
     }
 
     final txList = SizedBox(
-        height: (MediaQuery.of(context).size.height -
+        height: (mediaQuery.size.height -
                 appBar.preferredSize.height -
-                MediaQuery.of(context).padding.top) *
+                mediaQuery.padding.top) *
             0.78,
         child: TransactionList(_userTransactions, _deleteTransaction));
 
     return Scaffold(
       appBar: appBar,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Show chart',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Switch(
-                      value: _showChart,
-                      onChanged: (value) {
-                        setState(() {
-                          _showChart = value;
-                        });
-                      }),
-                ],
-              ),
-            if (!isLandscape) chartBox(0.25),
-            if (!isLandscape) txList,
-            if (isLandscape) _showChart ? chartBox(0.6) : txList
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isLandscape) ..._buildLandscapeContent(chartBox, txList),
+              if (!isLandscape) ..._buildPortraitContent(chartBox, txList)
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () => _startNewTransaction(context),
-      ),
+      floatingActionButton: Platform.isIOS
+          ? const SizedBox()
+          : FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () => _startNewTransaction(context),
+            ),
     );
   }
 }
